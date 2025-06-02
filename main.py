@@ -2,6 +2,7 @@
 
 import cv2
 import sys
+import os
 from hand_tracking import HandTracker
 from ring_detection import RingDetector
 
@@ -20,6 +21,27 @@ def is_ring_on_finger(ring_bbox, hand_landmarks, frame_width, frame_height):
                 return True
     return False
 
+def make_writer(video_path, frame_width, frame_height, fps=20.0,
+                out_dir="output_test_video"):
+    """
+    Returns an opened cv2.VideoWriter that writes an MP4 file called
+    <inputName>_output.mp4 inside *out_dir* (created if missing).
+    """
+    # 1. build output file name …/output_test_video/<input>_output.mp4
+    base = os.path.splitext(os.path.basename(video_path))[0]
+    os.makedirs(out_dir, exist_ok=True)
+    output_path = os.path.join(out_dir, f"{base}_output.mp4")
+
+    # 2. MPEG-4 codec that’s available on most default OpenCV builds
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")       # or *"avc1" / "H264" if you have them
+
+    # 3. open writer and hand it back
+    writer = cv2.VideoWriter(output_path, fourcc, fps,
+                             (frame_width, frame_height))
+    if not writer.isOpened():
+        raise RuntimeError("Couldn’t open VideoWriter - check codec/ffmpeg build")
+    return writer, output_path
+
 def main(video_path):
     cap = cv2.VideoCapture(video_path)
 
@@ -35,9 +57,20 @@ def main(video_path):
     frame_height, frame_width = frame.shape[:2]
 
     # ✅ Now it's safe to create VideoWriter
-    output_path = "output.avi"
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(output_path, fourcc, 20.0, (frame_width, frame_height))
+    # output_path = "output.avi"
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # out = cv2.VideoWriter(output_path, fourcc, 20.0, (frame_width, frame_height))
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise IOError(f"Cannot open {video_path}")
+
+    frame_width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps          = cap.get(cv2.CAP_PROP_FPS) or 20.0   # fallback if FPS not stored
+
+    out, output_path = make_writer(video_path, frame_width, frame_height, fps)
+
+    print(f"🔹 Writing processed frames to {output_path}")
 
     # Initialize detectors
     ring_detector = RingDetector(model_path="yolo_model/best.pt", conf_threshold=0.3)
@@ -63,6 +96,9 @@ def main(video_path):
                 x = int(x_norm * frame_width)
                 y = int(y_norm * frame_height)
                 cv2.circle(results_frame, (x, y), 3, (255, 0, 0), -1)
+
+        # out.write(results_frame)
+        # cv2.imshow("Ring + Hand Detection", results_frame)
 
         out.write(results_frame)
         cv2.imshow("Ring + Hand Detection", results_frame)
