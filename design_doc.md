@@ -14,23 +14,46 @@ Detect rings on fingers in recorded video and annotate each with a 2‑D inclina
 
 2  Scope & Assumptions
 
-In‑scope ✔︎	Out‑of‑scope ✘
-Rings on any finger (both hands)	Earrings, necklaces, dress segmentation
-Offline MP4 processing	Real‑time mobile inference
-2‑D in‑plane angle	Full 3‑D pose or depth angle
-≤2 hands visible (MediaPipe limit)	More than two hands
+In‑Scope
+
+    Rings on any finger (both hands)
+
+    Offline MP4 processing
+
+    2‑D in‑plane angle (no depth)
+
+    Up to two hands visible (MediaPipe limit)
+
+Out‑of‑Scope
+
+    Earrings, necklaces, dress segmentation
+
+    Real‑time mobile inference
+
+    Full 3‑D pose or depth angle
+
+    More than two hands
 
 Assumptions: rings appear at reasonable resolution and are not heavily occluded.
 
 ⸻
 
-3  Key Tasks & Library Choices (identified via ChatGPT)
+3  Key Tasks & Library Choices 
 
-Task	Library / Model	Why this choice
-Finger‑landmark tracking	MediaPipe Hands	Suggested by ChatGPT; 21 landmarks, CPU‑friendly.
-Ring detection	YOLOv8 (Ultralytics)	Suggested by ChatGPT; fast to fine‑tune for small custom objects.
-Ring–finger association	Bounding‑box ∩ landmark test (angle_utils)	Arrived via intuition; minimal compute and generally reliable.
-Angle estimation	Vector from finger base (MCP) → proximal (PIP)	Arrived via intuition; more stable than using fingertip direction.
+Task	
+->Library / Model / Why this choice
+
+Finger‑landmark tracking	MediaPipe Hands	
+    ->Suggested by ChatGPT; 21 landmarks, CPU‑friendly.
+
+Ring detection	YOLOv8 (Ultralytics)	
+    ->Suggested by ChatGPT; fast to fine‑tune for small custom objects.
+
+Ring–finger association	Bounding‑box ∩ landmark test (angle_utils)	
+    ->Arrived via intuition; minimal compute and generally reliable.
+
+Angle estimation Vector from finger base (MCP) → proximal (PIP)	
+    ->Arrived via intuition; more stable than using fingertip direction.
 
 
 ⸻
@@ -57,7 +80,7 @@ graph TD
 	•	YOLOv8‑nano, 50 epochs @ 360×360 in Google Colab.
 	•	best.pt stored in yolo_model/.
 
-Metric	Value
+Metric	(Value)
 Precision	0.874
 Recall	0.975
 
@@ -85,7 +108,7 @@ Pinky	 17	 18
 When a ring’s bounding-box overlaps a finger, the system needs a single, intuitive orientation. Because a ring sits at the base of a finger, the vector from the metacarpophalangeal (MCP) joint to the first proximal (PIP) joint is an excellent proxy for the ring’s tilt: it rotates only when the whole finger rotates and is unaffected by fingertip jitter.
 
 Angle formula (pixel space):
-\theta = \arctan2(y_{\text{PIP}}-y_{\text{MCP}},\; x_{\text{PIP}}-x_{\text{MCP}})
+theta = atan2(y_PIP - y_MCP, x_PIP - x_MCP)   # angle in radians
 Value is rounded to one decimal and displayed as “Index Angle: 42.6 deg”.
 
 ### 4.6  Overlay & Output
