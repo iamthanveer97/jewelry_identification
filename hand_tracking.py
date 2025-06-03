@@ -23,7 +23,7 @@ class HandTracker:
                 hand_landmarks.append(landmarks)
         return hand_landmarks
 
-    def draw_hands(self, frame):
+    def draw_hands(self, frame): #Mostly not used anywhere in the code
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.hands.process(rgb_frame)
         if result.multi_hand_landmarks:
