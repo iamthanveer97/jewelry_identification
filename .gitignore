@@ -7,3 +7,5 @@ test_videos/*
 __pycache__/
 *.DS_Store
 .vscode/
+
+.DS_Store
