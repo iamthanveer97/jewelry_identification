@@ -33,13 +33,13 @@ requirements.txt contains:
 2. Running the Project
 
 # default test video
-python main.py 
+python main.py (searches for sample.mp4, user needs a sample video stored in /test_videos)
 
 # your own video
 python main.py test_videos/your_video.mp4
 
-	•	Press q to quit early.
-	•	Output is saved to test_videos/output_<video-name>.mp4.
+•	Press q to quit early.
+•	Output is saved to test_videos/output_<video-name>.mp4.
 
 ⸻
 
@@ -62,14 +62,14 @@ jewelry_identification/
 
 4. Output Example
 	•	Green rectangle = detected ring
-	•	Yellow text = finger name and inclination angle in degrees
+	•	Green text = finger name and inclination angle in degrees
 	•	Blue skeleton = MediaPipe hand landmarks
 
 ⸻
 
 5. Training Your Own Ring Detector
 	1.	Collect & label ring images (Roboflow or CVAT).
-	2.	Export in YOLOv8 format.
+	2.	Export in YOLOv8 format. (Google colab notebook to train the model is located in /yolo_model)
 	3.	Train:
 
 yolo task=detect mode=train model=yolov8n.pt data=your/data.yaml epochs=100 imgsz=640
