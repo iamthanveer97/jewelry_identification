@@ -40,19 +40,19 @@ Assumptions: rings appear at reasonable resolution and are not heavily occluded.
 
 3  Key Tasks & Library Choices 
 
-Task	
-->Library / Model / Why this choice
+Task (Library / Model)
+-> Why this choice
 
-Finger‑landmark tracking	MediaPipe Hands	
+a. Finger‑landmark tracking	( MediaPipe Hands )
     ->Suggested by ChatGPT; 21 landmarks, CPU‑friendly.
 
-Ring detection	YOLOv8 (Ultralytics)	
+b. Ring detection	( YOLOv8 Ultralytics )
     ->Suggested by ChatGPT; fast to fine‑tune for small custom objects.
 
-Ring–finger association	Bounding‑box ∩ landmark test (angle_utils)	
+c. Ring–finger ( association Bounding‑box ∩ landmark test (angle_utils) )
     ->Arrived via intuition; minimal compute and generally reliable.
 
-Angle estimation Vector from finger base (MCP) → proximal (PIP)	
+d. Angle estimation ( Vector from finger base (MCP) → proximal (PIP) )
     ->Arrived via intuition; more stable than using fingertip direction.
 
 
@@ -80,9 +80,9 @@ graph TD
 	•	YOLOv8‑nano, 50 epochs @ 360×360 in Google Colab.
 	•	best.pt stored in yolo_model/.
 
-Metric	(Value)
+Metric	   (Value)
 Precision	0.874
-Recall	0.975
+Recall	    0.975
 
 ### 4.2  Ring Tracking (Frame‑to‑Frame)
 For v1 we reuse YOLO detections each frame; ID persistence is not critical.  Future versions may integrate Deep SORT for smoother temporal IDs.
@@ -99,11 +99,11 @@ angle_utils.is_ring_on_finger() tests if any landmark of a finger falls inside t
 For the matched finger we look at:
 
 Finger	base_idx (MCP)	prox_idx (PIP)
-Thumb	 2 	 3 
-Index	 5 	 6 
-Middle	 9 	 10
-Ring	 13	 14
-Pinky	 17	 18
+Thumb	 2 	                3 
+Index	 5 	                6 
+Middle	 9 	                10
+Ring	 13	                14
+Pinky	 17	                18
 
 When a ring’s bounding-box overlaps a finger, the system needs a single, intuitive orientation. Because a ring sits at the base of a finger, the vector from the metacarpophalangeal (MCP) joint to the first proximal (PIP) joint is an excellent proxy for the ring’s tilt: it rotates only when the whole finger rotates and is unaffected by fingertip jitter.
 
@@ -122,11 +122,18 @@ main.py draws:
 
 5  Known Limitations & Future Work
 
-Limitation	Planned Improvement
-Dataset still modest	Collect more diverse ring images (lighting, skin tones, poses).
-False positive when ring rests on finger but is not worn	Add depth cue / segmentation or stricter landmark overlap ratio.
-Angle shows “?” when no overlap	Fallback: pick finger with smallest centroid distance.
-Only 2‑D orientation	Investigate 3‑D hand mesh (MediaPipe Holistic) or depth sensor input.
+      Limitation	             Planned Improvement
+
+a. Dataset still modest	   Collect more diverse ring images (lighting, skin tones, poses).
+
+b. False positive when     Add depth cue / segmentation or stricter landmark overlap ratio.
+   ring rests on finger 
+   but is not worn	
+
+c. Angle shows “?” when    Fallback: pick finger with smallest centroid distance.
+   no overlap	
+
+d. Only 2‑D orientation	   Investigate 3‑D hand mesh (MediaPipe Holistic) or depth sensor input.
 
 
 ⸻
